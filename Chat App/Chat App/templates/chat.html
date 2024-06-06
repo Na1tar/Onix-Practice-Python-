@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .username {
+            color:
+
+        {
+
+        {
+            color
+        }
+
+        }
+        ;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome, <span class="username">{{ username }}</span>!</h1>
+    <form id="roomForm">
+        <input type="text" id="room" placeholder="Enter room name" required>
+        <button type="submit">Join Room</button>
+    </form>
+    <div id="chat">
+        <!-- Messages will be displayed here -->
+    </div>
+    <form id="messageForm" style="display: none;">
+        <input type="text" id="message" placeholder="Type your message" autocomplete="off" required>
+        <button type="submit">Send</button>
+    </form>
+    <script>
+        $(document).ready(function () {
+            var socket = io();
+            var currentRoom = '';
+
+            socket.on('message', function (data) {
+                $('#chat').append('<div><span style="color:' + data.color + '">' + data.msg + '</span></div>');
+            });
+
+            $('#roomForm').submit(function (e) {
+                e.preventDefault();
+                currentRoom = $('#room').val();
+                socket.emit('join', { room: currentRoom });
+                $('#messageForm').show();
+                $('#roomForm').hide();
+            });
+
+            $('#messageForm').submit(function (e) {
+                e.preventDefault();
+                var msg = $('#message').val();
+                socket.emit('message', { room: currentRoom, msg: msg });
+                $('#message').val('').focus();
+            });
+
+            $(window).on('beforeunload', function () {
+                if (currentRoom) {
+                    socket.emit('leave', { room: currentRoom });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
